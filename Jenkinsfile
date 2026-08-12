@@ -6,13 +6,6 @@ pipeline {
         BRANCH   = 'main'
     }
 
-    options {
-        // Automatically timeout the build if it takes longer than 15 minutes
-        timeout(time: 15, unit: 'MINUTES')
-        // Keep logs clean
-        ansiColor('xterm')
-    }
-
     stages {
         stage('1. Checkout Source Code') {
             steps {
