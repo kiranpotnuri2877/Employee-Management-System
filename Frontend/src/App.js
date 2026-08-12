@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import EmployeeForm from './components/EmployeeForm';
+import EmployeeForm from './EmployeeForm'; // Fix: Removed ./components/
 
 const API_BASE_URL = 'http://3.110.208.105:5000';
 
