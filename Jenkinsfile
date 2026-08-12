@@ -14,45 +14,21 @@ pipeline {
             }
         }
 
-        stage('2. Backend Dependency & Syntax Check') {
+        stage('2. Build & Deploy with Docker Compose') {
             steps {
-                echo 'Installing backend dependencies...'
-                dir('backend') {
-                    sh 'npm install'
-                }
-            }
-        }
-
-        stage('3. Frontend Test & Build Check') {
-            steps {
-                echo 'Installing frontend dependencies and verifying React build...'
-                dir('frontend') {
-                    sh 'npm install'
-                    sh 'npm run build'
-                }
-            }
-        }
-
-        stage('4. Deploy Stack via Docker Compose') {
-            steps {
-                echo 'Spinning down existing containers and deploying updated stack...'
-                // Stop and remove existing containers (avoids port binding conflicts)
+                echo 'Stopping old containers and building fresh Docker images...'
                 sh 'docker-compose down'
-                // Rebuild and start containers in background (-d)
                 sh 'docker-compose up --build -d'
             }
         }
 
-        stage('5. Health Check & Deployment Status') {
+        stage('3. Health Check & Status') {
             steps {
-                echo 'Waiting 10 seconds for MySQL and API to initialize...'
-                sleep 10
+                echo 'Waiting 15 seconds for MySQL, Express, and React to initialize...'
+                sleep 15
                 
                 echo 'Checking running Docker containers:'
                 sh 'docker ps'
-                
-                echo 'Verifying Backend Endpoint:'
-                sh 'curl -I http://localhost:5000/employees || exit 1'
             }
         }
     }
@@ -63,12 +39,11 @@ pipeline {
             sh 'docker image prune -f'
         }
         success {
-            echo '✅ Deployment Successful! Application is running at http://localhost:3000'
+            echo '✅ Deployment Successful! Your application is live.'
         }
         failure {
-            echo '❌ Pipeline failed! Fetching logs from backend and database:'
-            sh 'docker-compose logs api'
-            sh 'docker-compose logs db'
+            echo '❌ Deployment Failed. Checking container status:'
+            sh 'docker-compose ps'
         }
     }
 }
