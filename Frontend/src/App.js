@@ -1,62 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import EmployeeForm from './EmployeeForm';
-import EmployeeTable from './EmployeeTable';
-import Footer from './Footer';
+import EmployeeForm from './components/EmployeeForm';
+// import other components as needed...
+
+// Define API URL using EC2 Public IP
+const API_BASE_URL = 'http://3.110.208.105:5000';
 
 function App() {
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
+  // 1. Fetch Employees on Load
   useEffect(() => {
-    axios.get('http://localhost:5000/employees')
-      .then(response => setEmployees(response.data))
-      .catch(error => console.error(error));
+    axios.get(`${API_BASE_URL}/employees`)
+      .then(response => {
+        setEmployees(response.data);
+      })
+      .catch(error => console.error('Error fetching employees:', error));
   }, []);
 
-  const addEmployee = (newEmployee) => {
-    setEmployees([...employees, newEmployee]);
+  // 2. Delete Employee
+  const handleDeleteEmployee = (id) => {
+    axios.delete(`${API_BASE_URL}/employees/${id}`)
+      .then(() => {
+        setEmployees(employees.filter(emp => emp.id !== id));
+      })
+      .catch(error => console.error('Error deleting employee:', error));
   };
 
-  const updateEmployee = (updatedEmployee) => {
-    setEmployees(prevEmployees => prevEmployees.map(employee => (employee.id === updatedEmployee.id ? updatedEmployee : employee)));
-  };
-
-  const deleteEmployee = (id) => {
-    setEmployees(employees.filter(employee => employee.id !== id));
-  };
-
-  const selectEmployee = (employee) => {
-    setSelectedEmployee(employee);
-  };
-
-  const clearSelection = () => {
-    setSelectedEmployee(null);
-  };
-
-  return (
-    <div className="container mt-5">
-      <h1>Employee Management System</h1>
-      <div className="row">
-        <div className="col-md-6">
-          <EmployeeForm
-            onAddEmployee={addEmployee}
-            onUpdateEmployee={updateEmployee}
-            selectedEmployee={selectedEmployee}
-            onClearSelection={clearSelection}
-          />
-        </div>
-        <div className="col-md-6">
-          <EmployeeTable
-            employees={employees}
-            onDeleteEmployee={deleteEmployee}
-            onSelectEmployee={selectEmployee}
-          />
-        </div>
-      </div>
-      <Footer/>
-    </div>
-  );
-}
-
-export default App;
+  // ... rest of your App.js functions
