@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Defined API Base URL
+const API_BASE_URL = 'http://3.110.208.105:5000';
+
 const EmployeeForm = ({ onAddEmployee, onUpdateEmployee, selectedEmployee, onClearSelection }) => {
   const [employee, setEmployee] = useState({ name: '', position: '' });
 
@@ -18,14 +21,14 @@ const EmployeeForm = ({ onAddEmployee, onUpdateEmployee, selectedEmployee, onCle
 
   const addOrUpdateEmployee = () => {
     if (selectedEmployee) {
-      axios.put(`http://localhost:5000/employees/${selectedEmployee.id}`, employee)
+      axios.put(`${API_BASE_URL}/employees/${selectedEmployee.id}`, employee)
         .then(response => {
           onUpdateEmployee(response.data);
           onClearSelection();
         })
         .catch(error => console.error(error));
     } else {
-      axios.post('http://localhost:5000/employees', employee)
+      axios.post(`${API_BASE_URL}/employees`, employee)
         .then(response => {
           onAddEmployee(response.data);
           setEmployee({ name: '', position: '' });
