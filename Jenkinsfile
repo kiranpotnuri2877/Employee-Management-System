@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'agent1'   // Targets your newly created agent node
+    }
 
     environment {
         REPO_URL = 'https://github.com/kiranpotnuri2877/Employee-Management-System.git'
@@ -9,14 +11,15 @@ pipeline {
     stages {
         stage('1. Checkout Source Code') {
             steps {
-                echo 'Checking out source code from GitHub...'
-                git url: "${REPO_URL}", branch: "${BRANCH}"
+                echo "Checking out code on agent1..."
+                git branch: "${BRANCH}", url: "${REPO_URL}"
             }
         }
 
         stage('2. Build & Deploy with Docker Compose') {
             steps {
-                echo 'Stopping old containers and building fresh Docker images...'
+                echo "Deploying via agent1..."
+                sh 'docker rm -f emp-db emp-backend emp-frontend || true'
                 sh 'docker-compose down'
                 sh 'docker-compose up --build -d'
             }
@@ -24,26 +27,14 @@ pipeline {
 
         stage('3. Health Check & Status') {
             steps {
-                echo 'Waiting 15 seconds for MySQL, Express, and React to initialize...'
-                sleep 15
-                
-                echo 'Checking running Docker containers:'
-                sh 'docker ps'
+                sh 'docker-compose ps'
             }
         }
     }
 
     post {
         always {
-            echo 'Cleaning up dangling Docker images...'
-            sh 'docker image prune -f'
-        }
-        success {
-            echo '✅ Deployment Successful! Your application is live.'
-        }
-        failure {
-            echo '❌ Deployment Failed. Checking container status:'
-            sh 'docker-compose ps'
+            sh 'docker image prune -f || true'
         }
     }
 }
